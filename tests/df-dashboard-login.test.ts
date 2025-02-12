@@ -25,4 +25,31 @@ test('Dashboard', async ({ page }) => {
   await page.getByRole('button', { name: 'VERIFY' }).click();
 
 
+    // Click on the "Trade" button and wait for the new tab
+   const context = page.context();
+
+   page.locator('a.nav-link[href="/investing-club/home"]').click({ modifiers: ['Control'] }) // Open in new tab Investing Club
+    await page.getByRole('link', { name: "Transactions" }).click({ modifiers: ['Control'] }); // Open in new tab
+
+    const [investingClubTab, investorsCornerTab, transactionsTab] = await Promise.all([
+      context.waitForEvent('page'),
+      context.waitForEvent('page'),
+      context.waitForEvent('page')
+    ]);
+ // Ensure all tabs are loaded
+  await investingClubTab.waitForLoadState('domcontentloaded');
+  await investorsCornerTab.waitForLoadState('domcontentloaded');
+  await transactionsTab.waitForLoadState('domcontentloaded');
+
+  // Print URLs of the opened tabs
+  console.log(`Investing Club URL: ${investingClubTab.url()}`);
+  //console.log(`Investor’s Corner URL: ${investorsCornerTab.url()}`);
+  console.log(`Transactions URL: ${transactionsTab.url()}`);
+
+  // Take screenshots of the opened tabs
+  await investingClubTab.screenshot({ path: 'investing-club.png' });
+ // await investorsCornerTab.screenshot({ path: 'investors-corner.png' });
+  await transactionsTab.screenshot({ path: 'transactions.png' });
+    
+
 });
