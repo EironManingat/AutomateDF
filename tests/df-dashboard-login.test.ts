@@ -21,6 +21,7 @@ test('Dashboard', async ({ page }) => {
   await page.fill('input[name="email"]', 'dragonfi.qa2024@gmail.com ');
   await page.fill('input[name="password"]', 'Test123!');
   await page.getByRole('button', { name: 'LOGIN' }).click();
+  await page.getByRole('button', { name: 'EMAIL' }).click();
   await page.fill('#otp', '123456'); 
   await page.getByRole('button', { name: 'VERIFY' }).click();
 
