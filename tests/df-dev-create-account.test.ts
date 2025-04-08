@@ -1,10 +1,10 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Mass Registration', () => {
-  for (let i = 1; i <= 20; i++) {
+  for (let i = 1; i <= 5; i++) {
     test(`Register User ${i}`, async ({ page }) => {
       // Generate unique email by incrementing the number
-      const email = `eiron.maningat+test${342 + i}@dragonfi.ph`;
+      const email = `eiron.maningat+test${75 + i}@dragonfi.ph`;
 
       // Navigate to the registration page
       await page.goto('https://web-dev-rc.dragonfi.ph/register', { waitUntil: 'domcontentloaded' });
