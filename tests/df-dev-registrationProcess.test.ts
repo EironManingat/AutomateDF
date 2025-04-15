@@ -13,13 +13,13 @@ test.use({
 
 test('Dashboard', async ({ page }) => {
   // Navigate to the login page
-  await page.goto('https://web-dev-rc.dragonfi.ph/login', { waitUntil: 'networkidle' });
+  await page.goto('https://web-uat-rc.dragonfi.ph/login', { waitUntil: 'networkidle' });
   
   // Verify the "Log In" heading is visible
   await expect(page.getByRole('heading', { name: 'Log In' })).toBeVisible();
   
   // Fill in login credentials and submit
-  await page.fill('input[name="email"]', 'eiron.maningat+test302@dragonfi.ph');
+  await page.fill('input[name="email"]', 'eiron.maningat+test94@dragonfi.ph');
   await page.fill('input[name="password"]', 'Pass123!');
   await page.getByRole('button', { name: 'LOGIN' }).click();
   

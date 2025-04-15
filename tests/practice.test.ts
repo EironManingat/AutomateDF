@@ -13,7 +13,7 @@ test.use({
 test('JUMIO Bypass', async ({ page }) => {
 
    // Navigate to the login page of ATLAS CMS
-   await page.goto('https://atlas-dev.dragonfi.ph/#/login', { waitUntil: 'networkidle' });
+   await page.goto('https://atlas-uat.dragonfi.ph/#/login', { waitUntil: 'networkidle' });
 
    // Fill the username input field
    await page.fill('input[formcontrolname="username"]', 'complianceofficer@dragonfi.ph');
@@ -23,6 +23,13 @@ test('JUMIO Bypass', async ({ page }) => {
    
    // Click the 'Sign In' button
    await page.getByRole('button', { name: 'Sign In' }).click();
+
+   await page.locator('li.layout-root-menuitem:has(span:text-is("Clients"))').click();
+
+   await page.locator('a:has(span:text-is("New Accounts for Approval"))').click();
+
+   await page.getByText(acc, { exact: true }).click();
+
 
 
 });

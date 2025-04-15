@@ -12,7 +12,7 @@ test.use({
 
 test('JUMIO Bypass', async ({ page }) => {
   // Navigate to the login page of ATLAS CMS
-  await page.goto('https://atlas-dev.dragonfi.ph/#/login', { waitUntil: 'networkidle' });
+  await page.goto('https://atlas-uat.dragonfi.ph/#/login', { waitUntil: 'networkidle' });
 
   // Fill the username input field
   await page.fill('input[formcontrolname="username"]', 'test@dragonfi.ph');
@@ -43,49 +43,84 @@ test('JUMIO Bypass', async ({ page }) => {
   console.log('Refresh Token:', tokenData?.refreshToken);
   
     // Navigate to the login page
-  await page.goto('https://web-dev-rc.dragonfi.ph/login', { waitUntil: 'networkidle' });
+  await page.goto('https://web-uat-rc.dragonfi.ph/login', { waitUntil: 'networkidle' });
   
   // Verify the "Log In" heading is visible
   await expect(page.getByRole('heading', { name: 'Log In' })).toBeVisible();
   
   // Fill in login credentials and submit
-  await page.fill('input[name="email"]', 'eiron.maningat+test302@dragonfi.ph');
+  await page.fill('input[name="email"]', 'eiron.maningat+test94@dragonfi.ph');  // Replace with actual email
   await page.fill('input[name="password"]', 'Pass123!');
   await page.getByRole('button', { name: 'LOGIN' }).click();
+ 
 
     // Wait for navigation after login
     await page.waitForTimeout(2000);
 
-    // Get account code and client code from local storage
-    const accountData = await page.evaluate(() => {
-      const accountCode = localStorage.getItem('accountCode');
+    // Define the type for account data
+    interface AccountData {
+      accountCode: string | null;
+      clientCode: string | null;
+    }
+
+    // Get account code and client code from local storage with retry logic
+    let accountData: AccountData | null = null;
+    let maxRetries = 10;
+    let retryCount = 0;
+
+    while (retryCount < maxRetries) {
+      console.log(`Attempt ${retryCount + 1} to retrieve account and client codes...`);
       
-      // Get the loginData which contains the client code
-      const loginDataStr = localStorage.getItem('loginData');
-      let clientCode = null;
-      
-      if (loginDataStr) {
-        try {
-          const loginData = JSON.parse(loginDataStr);
-          clientCode = loginData.clientCode;
-        } catch (e) {
-          console.error('Error parsing loginData:', e);
+      accountData = await page.evaluate(() => {
+        const accountCode = localStorage.getItem('accountCode');
+        
+        // Get the loginData which contains the client code
+        const loginDataStr = localStorage.getItem('loginData');
+        let clientCode = null;
+        
+        if (loginDataStr) {
+          try {
+            const loginData = JSON.parse(loginDataStr);
+            clientCode = loginData.clientCode;
+          } catch (e) {
+            console.error('Error parsing loginData:', e);
+          }
         }
-      }
+        
+        return {
+          accountCode,
+          clientCode
+        };
+      });
       
-      return {
-        accountCode,
-        clientCode
-      };
-    });
-    
+      // Make sure accountData isn't null before checking its properties
+      if (!accountData || !accountData.accountCode || !accountData.clientCode) {
+        console.log('Missing data:', {
+          dataExists: !!accountData,
+          accountCodeExists: accountData ? !!accountData.accountCode : false,
+          clientCodeExists: accountData ? !!accountData.clientCode : false
+        });
+        // Wait before trying again
+        await page.waitForTimeout(1000);
+        retryCount++;
+      } else {
+        // We have all the data we need
+        break;
+      }
+    }
+
+    // Final check after attempts
+    if (!accountData || !accountData.accountCode || !accountData.clientCode) {
+      throw new Error(`Failed to retrieve required data after ${maxRetries} attempts.`);
+    }
+
     // Log the account code and client code
     console.log('Account Code:', accountData.accountCode); 
-    console.log('Client Code:', accountData.clientCode); 
+    console.log('Client Code:', accountData.clientCode);
 
 
   //Go to swagger
-  await page.goto('https://atlas-dev.dragonfi.ph/docs/index.html', { waitUntil: 'networkidle' });
+  await page.goto('https://atlas-uat.dragonfi.ph/docs/index.html', { waitUntil: 'networkidle' });
 
   await page.click('button.btn.authorize.unlocked');
 
@@ -126,7 +161,7 @@ await page.click('.btn.execute.opblock-control__btn');
 //COMPLIANCE OFFICER APPROVAL OF ACCOUNT
 
   // Navigate to the login page of ATLAS CMS
-  await page.goto('https://atlas-dev.dragonfi.ph/#/login', { waitUntil: 'networkidle' });
+  await page.goto('https://atlas-uat.dragonfi.ph/#/login', { waitUntil: 'networkidle' });
 
   // Fill the username input field
   await page.fill('input[formcontrolname="username"]', 'complianceofficer@dragonfi.ph');
@@ -136,5 +171,81 @@ await page.click('.btn.execute.opblock-control__btn');
   
   // Click the 'Sign In' button
   await page.getByRole('button', { name: 'Sign In' }).click();
+
+
+    // Approve Bypassed account via compliance staff 
+    await page.goto('https://atlas-uat.dragonfi.ph/#/login', { waitUntil: 'networkidle' });
+
+    // Fill the username input field
+    await page.fill('input[formcontrolname="username"]', 'test@dragonfi.ph');
+    
+    // Type the password
+    await page.fill('input[placeholder="Password"]', 'P@ssw0rd');
+    
+    // Click the 'Sign In' button
+    await page.getByRole('button', { name: 'Sign In' }).click();
+
+    await page.locator('li.layout-root-menuitem:has(span:text-is("Clients"))').click();
+
+    await page.locator('a:has(span:text-is("New Accounts for Approval"))').click();
+
+    await page.getByText(accountData.accountCode).click();
+
+    await page.getByRole('button', { name: 'Submit for approval' }).click();
+
+    await page.getByRole('button', { name: 'Accept request' }).click();
+
+    await page.waitForTimeout(1000);
+
+    // Approve Bypassed account via  compliance officer
+    await page.goto('https://atlas-uat.dragonfi.ph/#/login', { waitUntil: 'networkidle' });
+
+    // Fill the username input field
+    await page.fill('input[formcontrolname="username"]', 'complianceofficer@dragonfi.ph');
+    
+    // Type the password
+    await page.fill('input[placeholder="Password"]', 'P@ssw0rd');
+    
+    // Click the 'Sign In' button
+    await page.getByRole('button', { name: 'Sign In' }).click();
+
+    await page.locator('li.layout-root-menuitem:has(span:text-is("Clients"))').click();
+
+    await page.locator('a:has(span:text-is("New Accounts for Approval"))').click();
+
+    await page.getByText(accountData.accountCode).click();
+
+    await page.getByRole('button', { name: 'Approve' }).click();
+
+    await page.getByRole('button', { name: 'Accept request' }).click();
+
+    await page.waitForTimeout(1000);
+
+    // Check account if 0 balance
+    await page.goto('https://web-uat-rc.dragonfi.ph/login', { waitUntil: 'networkidle' });
+    
+    // Verify the "Log In" heading is visible
+    await expect(page.getByRole('heading', { name: 'Log In' })).toBeVisible();
+    
+    // Fill in login credentials and submit
+    await page.fill('input[name="email"]', 'eiron.maningat+test94@dragonfi.ph');  // Replace with actual email
+    await page.fill('input[name="password"]', 'Pass123!');
+    await page.getByRole('button', { name: 'LOGIN' }).click();
+    await page.fill('#otp', '123123'); 
+    await page.getByRole('button', { name: 'VERIFY' }).click();
+
+    // Check if "Available to Withdraw" section is visible with its value
+    await expect(page.locator('p.dsi-dashboard-available__label:has-text("Available to Withdraw")')).toBeVisible();
+    await expect(page.locator('p.dsi-dashboard-available__value:has-text("₱0.00")')).toBeVisible();
+
+    // For "Available to Trade" section
+    const tradeSection = page.locator('div').filter({ hasText: 'Available to Trade' }).first();
+    await expect(tradeSection).toBeVisible();
+    await expect(tradeSection.getByText('₱0.00')).toBeVisible();
+
+    // For "Available to Withdraw" section
+    const withdrawSection = page.locator('div').filter({ hasText: 'Available to Withdraw' }).first();
+    await expect(withdrawSection).toBeVisible();
+    await expect(withdrawSection.getByText('₱0.00')).toBeVisible();
 
 });

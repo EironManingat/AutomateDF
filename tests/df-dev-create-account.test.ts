@@ -4,10 +4,10 @@ test.describe('Mass Registration', () => {
   for (let i = 1; i <= 5; i++) {
     test(`Register User ${i}`, async ({ page }) => {
       // Generate unique email by incrementing the number
-      const email = `eiron.maningat+test${75 + i}@dragonfi.ph`;
+      const email = `eiron.maningat+test${90 + i}@dragonfi.ph`;
 
       // Navigate to the registration page
-      await page.goto('https://web-dev-rc.dragonfi.ph/register', { waitUntil: 'domcontentloaded' });
+      await page.goto('https://web-uat-rc.dragonfi.ph/register', { waitUntil: 'domcontentloaded' });
 
       // Add a small random wait to prevent potential rate limiting
       await page.waitForTimeout(Math.floor(Math.random() * 2000) + 1000); // Random wait between 1-3 seconds
